@@ -132,6 +132,7 @@ with TcgLookupClient(api_key="tlk_live_...") as client:
 - [tcglookup-rs](https://github.com/TCG-Price-Lookup/tcglookup-rs) — Rust
 - [tcglookup-php](https://github.com/TCG-Price-Lookup/tcglookup-php) — PHP
 - [tcglookup CLI](https://www.npmjs.com/package/tcglookup) — terminal client
+- [tcg-api-examples](https://github.com/TCG-Price-Lookup/tcg-api-examples) — runnable code samples in 8 languages
 
 The full developer ecosystem index lives at **[awesome-tcg](https://github.com/TCG-Price-Lookup/awesome-tcg)**.
 
