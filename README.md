@@ -133,6 +133,7 @@ with TcgLookupClient(api_key="tlk_live_...") as client:
 - [tcglookup-php](https://github.com/TCG-Price-Lookup/tcglookup-php) — PHP
 - [tcglookup CLI](https://www.npmjs.com/package/tcglookup) — terminal client
 - [tcg-api-examples](https://github.com/TCG-Price-Lookup/tcg-api-examples) — runnable code samples in 8 languages
+- [tcg-discord-bot](https://github.com/TCG-Price-Lookup/tcg-discord-bot) — self-hosted Discord bot with slash commands
 
 The full developer ecosystem index lives at **[awesome-tcg](https://github.com/TCG-Price-Lookup/awesome-tcg)**.
 
