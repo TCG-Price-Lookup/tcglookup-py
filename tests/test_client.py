@@ -57,7 +57,7 @@ def test_plan_access_error_on_history(httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(
         url="https://api.tcgpricelookup.com/v1/cards/abc-123/history?period=30d",
         status_code=403,
-        json={"error": "history requires Trader plan"},
+        json={"error": "history requires a paid plan"},
     )
     client = make_client()
     with pytest.raises(PlanAccessError):
@@ -108,3 +108,62 @@ def test_batch_search_chunks_over_20_ids(httpx_mock: HTTPXMock) -> None:
     client = make_client()
     result = client.cards.search(ids=ids)
     assert len(result["data"]) == 45
+
+
+# -- resolve_printing ---------------------------------------------------
+
+# One set page shared by the resolve tests: a base printing plus a Showcase
+# treatment that carries its own collector number and both finishes.
+_LIARA_SET_PAGE = {
+    "data": [
+        {"id": "base", "name": "Commander Liara Portyr",
+         "number": "270", "variant": "Normal"},
+        {"id": "showcase-normal", "name": "Commander Liara Portyr (Showcase)",
+         "number": "418", "variant": "Normal"},
+        {"id": "showcase-foil", "name": "Commander Liara Portyr (Showcase)",
+         "number": "418", "variant": "Foil"},
+    ],
+    "total": 3,
+    "limit": 100,
+    "offset": 0,
+}
+
+
+def test_resolve_printing_finds_treatment_by_number(httpx_mock: HTTPXMock) -> None:
+    httpx_mock.add_response(method="GET", json=_LIARA_SET_PAGE)
+    client = make_client()
+    card = client.cards.resolve_printing(
+        set="commander-legends-battle-for-baldurs-gate",
+        number="418",
+        variant="Foil",
+        game="magic",
+    )
+    assert card is not None
+    assert card["id"] == "showcase-foil"
+
+
+def test_resolve_printing_variant_is_case_insensitive(httpx_mock: HTTPXMock) -> None:
+    httpx_mock.add_response(method="GET", json=_LIARA_SET_PAGE)
+    client = make_client()
+    card = client.cards.resolve_printing(
+        set="clb", number="418", variant="normal"
+    )
+    assert card is not None
+    assert card["id"] == "showcase-normal"
+
+
+def test_resolve_printing_without_variant_returns_first_match(
+    httpx_mock: HTTPXMock,
+) -> None:
+    httpx_mock.add_response(method="GET", json=_LIARA_SET_PAGE)
+    client = make_client()
+    card = client.cards.resolve_printing(set="clb", number="418")
+    assert card is not None
+    assert card["id"] == "showcase-normal"
+
+
+def test_resolve_printing_returns_none_when_no_match(httpx_mock: HTTPXMock) -> None:
+    httpx_mock.add_response(method="GET", json=_LIARA_SET_PAGE)
+    client = make_client()
+    card = client.cards.resolve_printing(set="clb", number="999")
+    assert card is None

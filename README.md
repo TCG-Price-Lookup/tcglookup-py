@@ -31,7 +31,7 @@ for card in results["data"]:
 card = client.cards.get("a3f8c1e2-...")
 print(card["name"], card["prices"])
 
-# Daily price history (Trader plan and above)
+# Daily price history (paid plans)
 history = client.cards.history("a3f8c1e2-...", period="30d")
 for day in history["data"]:
     print(day["date"], day["prices"])
@@ -43,7 +43,7 @@ for game in client.games.list()["data"]:
 
 ## Get an API key
 
-Sign up at [tcgpricelookup.com/tcg-api](https://tcgpricelookup.com/tcg-api). Free tier includes 10,000 requests per month with TCGPlayer market prices. Trader plan unlocks eBay sold averages, PSA / BGS / CGC graded prices, and full price history.
+Sign up at [tcgpricelookup.com/tcg-api](https://tcgpricelookup.com/tcg-api). The free tier includes TCGPlayer market prices. Paid plans unlock eBay sold averages, PSA / BGS / CGC graded prices, and full price history.
 
 ## API surface
 
@@ -61,6 +61,17 @@ client.cards.search(
 client.cards.get("<card-uuid>")
 
 client.cards.history("<card-uuid>", period="30d")  # 7d | 30d | 90d | 1y
+
+# Resolve one exact printing by set + collector number.
+# Reliable for special treatments (Showcase, Borderless, Extended Art,
+# Etched Foil), which a name search would shadow with the base printing.
+card = client.cards.resolve_printing(
+    game="magic",
+    set="commander-legends-battle-for-baldurs-gate",
+    number="418",        # the Showcase collector number, not the base 270
+    variant="Foil",      # optional: "Normal" | "Foil" when a number has both
+)
+print(card["id"], card["name"])  # -> the exact Showcase Foil UUID
 ```
 
 ### Sets
@@ -101,7 +112,7 @@ try:
 except AuthenticationError:
     print("Bad API key")
 except PlanAccessError:
-    print("History requires Trader plan — upgrade at tcgpricelookup.com/tcg-api")
+    print("History requires a paid plan — upgrade at tcgpricelookup.com/tcg-api")
 except NotFoundError:
     print("That card doesn't exist")
 except RateLimitError:

@@ -28,8 +28,8 @@ class AuthenticationError(TcgLookupError):
 class PlanAccessError(TcgLookupError):
     """403 — your plan does not include access to this resource.
 
-    Free plan keys hit this on price history endpoints. Upgrade to
-    Trader or higher at https://tcgpricelookup.com/tcg-api.
+    Free plan keys hit this on price history endpoints. Upgrade to a
+    paid plan at https://tcgpricelookup.com/tcg-api.
     """
 
 

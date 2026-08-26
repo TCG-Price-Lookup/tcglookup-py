@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tcglookup"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python SDK for TCG Price Lookup — live trading card prices across Pokemon, MTG, Yu-Gi-Oh, Lorcana, One Piece, SWU, Flesh and Blood"
 readme = "README.md"
 license = { text = "MIT" }

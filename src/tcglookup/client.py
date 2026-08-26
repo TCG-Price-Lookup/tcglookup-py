@@ -9,7 +9,7 @@ import httpx
 from .errors import error_from_response
 
 DEFAULT_BASE_URL = "https://api.tcgpricelookup.com/v1"
-DEFAULT_USER_AGENT = "tcglookup-py/0.1.0"
+DEFAULT_USER_AGENT = "tcglookup-py/0.2.0"
 SEARCH_IDS_CHUNK_SIZE = 20
 
 
@@ -181,7 +181,7 @@ class CardsResource:
     ) -> dict[str, Any]:
         """Daily price history for a card.
 
-        Trader plan and above. Free-tier keys raise PlanAccessError.
+        Requires a paid plan. Free-tier keys raise PlanAccessError.
 
         Args:
             period: One of ``"7d"``, ``"30d"``, ``"90d"``, ``"1y"``.
@@ -191,6 +191,51 @@ class CardsResource:
         return self._client._request(
             f"/cards/{card_id}/history", query={"period": period}
         )
+
+    def resolve_printing(
+        self,
+        *,
+        set: str,  # noqa: A002 — matches API param name
+        number: str,
+        game: str | None = None,
+        variant: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Resolve one exact printing by set and collector number.
+
+        Unlike :meth:`search`, whose ``q`` matches the card *name* only,
+        this pages through the set and matches the exact collector
+        ``number`` (and finish, if given). That makes it reliable for
+        special-treatment printings (Showcase, Borderless, Extended Art,
+        Etched Foil), each of which has its own collector number and would
+        otherwise be shadowed by the base printing in a name search.
+
+        Args:
+            set: The set slug (from ``sets.list()`` or a card's ``set_slug``).
+            number: The exact collector number, e.g. ``"418"``. Matched as a
+                string, so values like ``"104/185"`` work too.
+            game: Optional game slug, e.g. ``"magic"``.
+            variant: Optional finish, ``"Normal"`` or ``"Foil"``
+                (case-insensitive). Pass it when a number has both.
+
+        Returns:
+            The matching card dict (with its ``id`` and ``prices``), or
+            ``None`` if nothing in the set matches.
+        """
+        offset = 0
+        while True:
+            page = self._search_once(
+                q=None, ids=None, game=game, set=set, limit=100, offset=offset
+            )
+            rows = page.get("data", []) or []
+            for card in rows:
+                if str(card.get("number")) != str(number):
+                    continue
+                if variant and (card.get("variant") or "").lower() != variant.lower():
+                    continue
+                return card
+            if len(rows) < 100:
+                return None
+            offset += 100
 
     # -- helpers --------------------------------------------------------
 
